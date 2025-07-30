@@ -1,0 +1,27 @@
+{
+  "canisters": {
+    "crowdfund-rustchain-backend": {
+      "candid": "src/crowdfund-rustchain-backend/crowdfund-rustchain-backend.did",
+      "package": "crowdfund-rustchain-backend",
+      "type": "rust"
+    },
+    "crowdfund-rustchain-frontend": {
+      "dependencies": [
+        "crowdfund-rustchain-backend"
+      ],
+      "source": [
+        "src/crowdfund-rustchain-frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "crowdfund-rustchain-frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
