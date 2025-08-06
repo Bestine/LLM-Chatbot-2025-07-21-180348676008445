@@ -44,7 +44,7 @@ thread_local! {
         )
     );
 
-    static EXMAP_MAP: RefCell<StableBTreeMap<u64, Exam, Memory>> = RefCell::new(
+    static EXAM_MAP: RefCell<StableBTreeMap<u64, Exam, Memory>> = RefCell::new(
         StableBTreeMap::init(
             MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0)))
         )
@@ -55,4 +55,62 @@ thread_local! {
             MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1)))
         )
     );
+}
+
+// // Implement the query and update functions
+// // --- Query Functions ---
+// #[ic_cdk::query]
+// fn get_participation(key: u64) -> Option<u64> {
+//     PARTICIPATION_PERCENTAGE_MAP.with(
+//         |p: &RefCell<BTreeMap<u64, u64, _>>| p.borrow().get(&key)
+//     )
+// }
+
+// #[ic_cdk::query]
+// fn get_exam(key: u64) -> Option<Exam> {
+//     EXAM_MAP.with(
+//         |p: &RefCell<BTreeMap<u64, Exam, _>>| p.borrow().get(&key)
+//     )
+// }
+ 
+// // --- Update Functions ---
+// #[ic_cdk::update]
+// fn insert_exam(key: u64, value: Exam) -> Option<Exam> {
+//     EXAM_MAP.with(
+//         |p: &RefCell<BTreeMap<u64, Exam, _>>| p.borrow_mut().insert(key, value)
+//     )
+// }
+
+// #[ic_cdk::update]
+// fn insert_participation(key: u64, value: u64) -> Option<u64> {
+//     PARTICIPATION_PERCENTAGE_MAP.with(
+//         |p: &RefCell<BTreeMap<u64, u64, _>>| p.borrow_mut().insert(key, value)
+//     )
+// }
+
+#[ic_cdk::query]
+fn get_participation(key: u64) -> Option<u64> {
+    PARTICIPATION_PERCENTAGE_MAP.with(
+        |p: &RefCell<StableBTreeMap<u64, u64, _>>| p.borrow().get(&key)
+    )
+}
+
+#[ic_cdk::query]
+fn get_exam(key: u64) -> Option<Exam> {
+    EXAM_MAP.with(
+        |p: &RefCell<StableBTreeMap<u64, Exam, _>>| p.borrow().get(&key)
+    )
+}
+
+#[ic_cdk::update]
+fn insert_exam(key: u64, value: Exam) -> Option<Exam> {
+    EXAM_MAP.with(
+        |p: &RefCell<StableBTreeMap<u64, Exam, _>>| p.borrow_mut().insert(key, value)
+    )
+}
+
+fn insert_participation(key: u64, value: u64) -> Option<u64> {
+    PARTICIPATION_PERCENTAGE_MAP.with(
+        |p: &RefCell<StableBTreeMap<u64, u64, _>>| p.borrow_mut().insert(key, value)
+    )
 }
