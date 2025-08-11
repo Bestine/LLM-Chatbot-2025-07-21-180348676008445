@@ -1,6 +1,7 @@
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{BoundedStorable, DefaultMemoryImpl, StableBTreeMap, Storable};
+use serde::de::value;
 use std::{borrow::Cow, cell::RefCell};
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
@@ -99,4 +100,40 @@ fn create_proposal(key: u64, proposal: CreateProposal) -> Option<Proposal> {
 
     PROPOSAL_MAP
         .with(|p: &RefCell<StableBTreeMap<u64, Proposal, _>>| p.borrow_mut().insert(key, value))
+}
+
+#[ic_cdk::update]
+fn edit_proposal(key: u64, proposal: CreateProposal) -> Result<(), VoteError> {
+    PROPOSAL_MAP.with(
+        |p: &RefCell<StableBTreeMap<u64, Proposal, _>>| -> Result<(), VoteError> {
+            let old_proposal_opt: Option<Proposal> = p.borrow().get(&key);
+            let old_proposal: Proposal;
+
+            match old_proposal_opt {
+                Some(value) => old_proposal = value,
+                None => return Err(VoteError::NoSuchProposal),
+            }
+
+            if ic_cdk::caller() != old_proposal.owner {
+                return Err(VoteError::AccessRejected);
+            }
+
+            let value: Proposal = Proposal {
+                description: proposal.description,
+                approve: old_proposal.approve,
+                reject: old_proposal.reject,
+                pass: old_proposal.pass,
+                is_active: proposal.is_active,
+                voted: old_proposal.voted,
+                owner: ic_cdk::caller(),
+            };
+
+            let res: Option<Proposal> = p.borrow_mut().insert(key, value);
+
+            match res {
+                Some(_) => Ok(()),
+                None => Err(VoteError::UpdateError),
+            }
+        },
+    )
 }
