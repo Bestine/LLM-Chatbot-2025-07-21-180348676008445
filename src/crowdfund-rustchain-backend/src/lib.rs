@@ -7,6 +7,23 @@ type Memory = VirtualMemory<DefaultMemoryImpl>;
 
 const MAX_VALUE_SIZE: u32 = 5000;
 
+#[derive(CandidType, Deserialize)]
+enum Choice {
+    Approve,
+    Reject,
+    Pass,
+}
+
+#[derive(CandidType)]
+enum VoteError {
+    AlreadyVoted,
+    ProposalIsNotActive,
+    InvalidChoice,
+    NoSuchProposal,
+    AccessRejected,
+    UpdateError,
+}
+
 // Define a proposal struct - to store proposal data
 #[derive(CandidType, Deserialize)]
 struct Proposal {
